@@ -61,8 +61,6 @@ async function codeReview(parameters) {
           temperature: parameters.temperature,
         });
 
-        console.log("response", JSON.stringify(response));
-
         await octokit.issues.createComment({
           owner: process.env.GITHUB_REPOSITORY_OWNER,
           repo: process.env.GITHUB_REPOSITORY_NAME,
@@ -100,13 +98,11 @@ const args = require("minimist")(process.argv.slice(2));
 
 (async () => {
   const parameters = {
-    pr_id: parseInt(args["github-pr-id"]) || 2,
-    prompt: makePrompt(args["dev-lang"]) || "Javascript",
-    temperature: parseFloat(args["openai-temperature"]) || 0.0,
-    model: args["openai-engine"] || "gpt-3.5-turbo",
+    pr_id: parseInt(args["github-pr-id"]),
+    prompt: makePrompt(args["dev-lang"]),
+    temperature: parseFloat(args["openai-temperature"]),
+    model: args["openai-engine"],
   };
-
-  console.log("args", JSON.stringify(args));
 
   await codeReview(parameters);
 })();
