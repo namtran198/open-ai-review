@@ -1,10 +1,8 @@
-import { Octokit } from "@octokit/rest";
-import OpenAI from "openai";
+const { Octokit } = require("@octokit/rest");
+const OpenAIAPI = require("openai");
 
-const octokit = new Octokit();
-const openai = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-});
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const openai = new OpenAIAPI({ key: process.env.OPENAI_API_KEY });
 
 async function codeReview(parameters) {
   const repo = await octokit.repos.get({
@@ -49,6 +47,8 @@ async function codeReview(parameters) {
         ref: commit.sha,
       });
 
+      console.log("content", JSON.stringify(content));
+
       try {
         const response = await openai.chat.completions.create({
           model: parameters.model,
@@ -61,11 +61,13 @@ async function codeReview(parameters) {
           temperature: parameters.temperature,
         });
 
+        console.log("response", JSON.stringify(response));
+
         await octokit.issues.createComment({
           owner: process.env.GITHUB_REPOSITORY_OWNER,
           repo: process.env.GITHUB_REPOSITORY_NAME,
           issue_number: parameters.pr_id,
-          body: `ChatGPT's review about \`${filename}\` file:\n ${response.data.choices[0].message.content}`,
+          body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
         });
       } catch (ex) {
         const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
@@ -98,11 +100,13 @@ const args = require("minimist")(process.argv.slice(2));
 
 (async () => {
   const parameters = {
-    pr_id: parseInt(args["github-pr-id"]),
-    prompt: makePrompt(args["dev-lang"]),
-    temperature: parseFloat(args["openai-temperature"]),
-    model: args["openai-engine"],
+    pr_id: parseInt(args["github-pr-id"]) || 2,
+    prompt: makePrompt(args["dev-lang"]) || "Javascript",
+    temperature: parseFloat(args["openai-temperature"]) || 0.0,
+    model: args["openai-engine"] || "gpt-3.5-turbo",
   };
+
+  console.log("args", JSON.stringify(args));
 
   await codeReview(parameters);
 })();
