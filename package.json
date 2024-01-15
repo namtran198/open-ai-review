@@ -10,8 +10,8 @@
     "url": "https://github.com/namtran198/open-ai-review.git"
   },
   "dependencies": {
-    "@octokit/rest": "2.0.2",
-    "minimsit": "1.2.8",
+    "@octokit/rest": "20.0.2",
+    "minimist": "1.2.8",
     "openai": "4.24.2"
   },
   "scripts": {
