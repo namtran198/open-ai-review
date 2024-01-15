@@ -97,6 +97,7 @@ function makeResumeForPullRequest(pr) {
 const args = require("minimist")(process.argv.slice(2));
 
 (async () => {
+  console.log('RUN CODE REVIEW')
   const parameters = {
     pr_id: parseInt(args["github-pr-id"]),
     prompt: makePrompt(args["dev-lang"]),
