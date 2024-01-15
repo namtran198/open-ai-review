@@ -14,7 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Run review
     steps:
-      - uses: ./
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run review
+        uses: ./
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
