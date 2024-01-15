@@ -1,4 +1,4 @@
-name: GlobantBot Code Review
+name: BOT AI Code Review
 
 permissions:
   contents: read
@@ -7,14 +7,19 @@ permissions:
 on:
   pull_request:
     branches: [main]
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 jobs:
   code-review:
     runs-on: ubuntu-latest
     name: Run review
     steps:
-      - uses: ./
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run review
+        uses: ./
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
