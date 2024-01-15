@@ -106,7 +106,7 @@ const args = require("minimist")(process.argv.slice(2));
     openai_api_key: args["openai-api-key"],
   };
 
-  console.log(parameters)
+  console.log(JSON.stringify(parameters))
 
   await codeReview(parameters);
 })();
