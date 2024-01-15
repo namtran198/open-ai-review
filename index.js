@@ -104,5 +104,7 @@ const args = require("minimist")(process.argv.slice(2));
     model: args["openai-engine"],
   };
 
+  console.log(parameters)
+
   await codeReview(parameters);
 })();
