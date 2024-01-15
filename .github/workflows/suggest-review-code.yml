@@ -1,0 +1,39 @@
+# on: [push]
+
+# jobs:
+#   hello_world_job:
+#     runs-on: ubuntu-latest
+#     name: A job to say hello
+#     steps:
+#       - name: Hello world action step
+#         id: hello
+#         uses: actions/hello-world-docker-action@v2
+#         with:
+#           who-to-greet: 'Mona the Octocat'
+#       # Use the output from the `hello` step
+#       - name: Get the output time
+#         run: echo "The time was ${{ steps.hello.outputs.time }}"
+
+name: GlobantBot Code Review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    name: Run review
+    steps:
+      - uses: fitomad/github-chatgpt-integration@main
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-pr-id: ${{ github.event.number }}
+          dev-lang: Javascript
+          openai-max-tokens: 4096

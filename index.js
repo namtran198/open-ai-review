@@ -1,12 +1,12 @@
-import { Octokit } from "@octokit/rest";
-import OpenAI from "openai";
-
-const octokit = new Octokit();
-const openai = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-});
+const { Octokit } = require("@octokit/rest");
+const OpenAI = require("openai");
 
 async function codeReview(parameters) {
+  const octokit = new Octokit();
+  const openai = new OpenAI({
+    apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
+  });
+
   const repo = await octokit.repos.get({
     owner: process.env.GITHUB_REPOSITORY_OWNER,
     repo: process.env.GITHUB_REPOSITORY_NAME,
@@ -103,6 +103,8 @@ const args = require("minimist")(process.argv.slice(2));
     temperature: parseFloat(args["openai-temperature"]),
     model: args["openai-engine"],
   };
+
+  console.log("args", JSON.stringify(args));
 
   await codeReview(parameters);
 })();
