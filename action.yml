@@ -1,4 +1,4 @@
-name: 'The Code Reviewer'
+name: 'Open AI Reviewer'
 description: 'Automating code review using ChatGPT with Github Actions. Look for potential bugs and suggest code improvements in your PR'
 branding:
   icon: 'arrow-up-right'
