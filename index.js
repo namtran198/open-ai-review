@@ -1,10 +1,10 @@
 const { Octokit } = require("@octokit/rest");
 const OpenAIAPI = require("openai");
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-const openai = new OpenAIAPI({ key: process.env.OPENAI_API_KEY });
-
 async function codeReview(parameters) {
+  const octokit = new Octokit({ auth: parameters.github_token });
+  const openai = new OpenAIAPI({ key: parameters.openai_api_key });
+
   const repo = await octokit.repos.get({
     owner: process.env.GITHUB_REPOSITORY_OWNER,
     repo: process.env.GITHUB_REPOSITORY_NAME,
@@ -102,6 +102,8 @@ const args = require("minimist")(process.argv.slice(2));
     prompt: makePrompt(args["dev-lang"]),
     temperature: parseFloat(args["openai-temperature"]),
     model: args["openai-engine"],
+    github_token: args["github-token"],
+    openai_api_key: args["openai-api-key"],
   };
 
   console.log(parameters)
