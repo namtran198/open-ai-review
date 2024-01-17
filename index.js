@@ -5,7 +5,8 @@ async function codeReview(parameters) {
   const octokit = new Octokit({ auth: parameters.github_token });
   const openai = new OpenAI({ apiKey: parameters.openai_api_key });
 
-  const [repositoryOwner, repositoryName] = parameters.github_repository.split("/");
+  const [repositoryOwner, repositoryName] =
+    parameters.github_repository.split("/");
 
   const repo = await octokit.repos.get({
     owner: repositoryOwner,
@@ -104,10 +105,8 @@ const args = require("minimist")(process.argv.slice(2));
     model: args["openai-engine"],
     github_token: args["github-token"],
     openai_api_key: args["openai-api-key"],
-    github_repository: args["github-repository"]
+    github_repository: args["github-repository"],
   };
-
-  console.log(JSON.stringify(parameters))
 
   await codeReview(parameters);
 })();
