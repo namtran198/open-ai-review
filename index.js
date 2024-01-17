@@ -82,7 +82,7 @@ async function codeReview(parameters) {
 }
 
 function makePrompt(devLang) {
-  return `"Given the following patch:\\n\\n%s\\n\\nif there are any new functions in this patch that do not already have a unit test for them, then create GitHub Review comments suggesting each unit test as a code change and fill each one into a JSON object like: { \"path\": \"\", \"body\": \"FILL IN SUGGESTION\\n\\\\u0060\\\\u0060\\\\u0060suggestion\\nUNIT_TEST_CODE\\\\u0060\\\\u0060\\\\u0060\", \"start_side\": \"RIGHT\", \"side\": \"RIGHT\", \"start_line\":  STARTING_LINE, \"line\": ENDING_LINE } and then return just those objects in an array."`;
+  return `If there are any new functions in this file that do not already have a unit test for them with ${devLang} language, then create GitHub Review comments suggesting each unit test as a code change`;
 }
 
 function makeResumeForPullRequest(pr) {
