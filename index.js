@@ -3,6 +3,7 @@ const OpenAI = require("openai");
 
 async function codeReview(parameters) {
   const octokit = new Octokit({ auth: parameters.github_token });
+  console.log(JSON.stringify(parameters))
   const openai = new OpenAI({ key: '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' });
 
   const repo = await octokit.repos.get({
