@@ -8,16 +8,22 @@ async function codeReview(parameters) {
   const [repositoryOwner, repositoryName] =
     parameters.github_repository.split("/");
 
+  console.log({ repositoryOwner, repositoryName });
+
   const repo = await octokit.repos.get({
     owner: repositoryOwner,
     repo: repositoryName,
   });
+
+  console.log("repo", JSON.stringify(repo));
 
   const pullRequest = await octokit.pulls.get({
     owner: repositoryOwner,
     repo: repositoryName,
     pull_number: parameters.pr_id,
   });
+
+  console.log("pullRequest", JSON.stringify(pullRequest));
 
   const resume = makeResumeForPullRequest(pullRequest.data);
   await octokit.issues.createComment({
@@ -55,7 +61,7 @@ async function codeReview(parameters) {
           ref: commit.sha,
         });
 
-        console.log(JSON.stringify(content))
+        console.log(JSON.stringify(content));
 
         try {
           const response = await openai.chat.completions.create({
@@ -69,7 +75,7 @@ async function codeReview(parameters) {
             temperature: parameters.temperature,
           });
 
-          console.log(JSON.stringify(response))
+          console.log(JSON.stringify(response));
 
           await octokit.issues.createComment({
             owner: repositoryOwner,
