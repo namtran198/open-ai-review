@@ -82,7 +82,7 @@ async function codeReview(parameters) {
 }
 
 function makePrompt(devLang) {
-  return `If there are any new functions in this file that do not already have a unit test for them with ${devLang} language, then create unit test for these functions`;
+  return `If there are any new functions in this file that do not already have a unit test for them with ${devLang} language, then write a test case (unit-test) for these functions in Jest`;
 }
 
 function makeResumeForPullRequest(pr) {
