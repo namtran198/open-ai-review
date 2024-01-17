@@ -49,6 +49,8 @@ async function codeReview(parameters) {
       commit_sha: commit.sha,
     });
 
+    console.log('files', JSON.stringify(files))
+
     for (const file of files.data) {
       const filename = file.filename;
       if (
