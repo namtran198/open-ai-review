@@ -32,6 +32,10 @@ inputs:
     description: 'The maximum number of tokens to generate in the completion.'
     required: false
     default: '4096'
+  github-repository:
+    description: 'Github repository name'
+    required: false
+    default: ''
 runs:
   using: 'docker'
   image: 'Dockerfile'
