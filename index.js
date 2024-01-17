@@ -61,8 +61,7 @@ async function codeReview(parameters) {
         const content = await octokit.repos.getContent({
           owner: repositoryOwner,
           repo: repositoryName,
-          path: filename,
-          ref: commit.sha,
+          path: filename
         });
 
         console.log(JSON.stringify(content));
