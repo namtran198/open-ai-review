@@ -43,3 +43,4 @@ runs:
     - ${{ inputs.openai-engine }}
     - ${{ inputs.openai-temperature }}
     - ${{ inputs.openai-max-tokens }}
+    - ${{ inputs.github-repository }}
