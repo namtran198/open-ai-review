@@ -43,39 +43,45 @@ async function codeReview(parameters) {
 
     for (const file of files.data) {
       const filename = file.filename;
-      const content = await octokit.repos.getContent({
-        owner: repositoryOwner,
-        repo: repositoryName,
-        path: filename,
-        ref: commit.sha,
-      });
-
-      try {
-        const response = await openai.chat.completions.create({
-          model: parameters.model,
-          messages: [
-            {
-              role: "user",
-              content: `${parameters.prompt}:\n\`\`\`${content.data.content}\`\`\``,
-            },
-          ],
-          temperature: parameters.temperature,
-        });
-
-        await octokit.issues.createComment({
+      if (
+        filename.endsWith(".js") ||
+        filename.endsWith(".ts") ||
+        filename.endsWith(".tsx")
+      ) {
+        const content = await octokit.repos.getContent({
           owner: repositoryOwner,
           repo: repositoryName,
-          issue_number: parameters.pr_id,
-          body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
+          path: filename,
+          ref: commit.sha,
         });
-      } catch (ex) {
-        const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
-        await octokit.issues.createComment({
-          owner: repositoryOwner,
-          repo: repositoryName,
-          issue_number: parameters.pr_id,
-          body: message,
-        });
+
+        try {
+          const response = await openai.chat.completions.create({
+            model: parameters.model,
+            messages: [
+              {
+                role: "user",
+                content: `${parameters.prompt}:\n\`\`\`${content.data.content}\`\`\``,
+              },
+            ],
+            temperature: parameters.temperature,
+          });
+
+          await octokit.issues.createComment({
+            owner: repositoryOwner,
+            repo: repositoryName,
+            issue_number: parameters.pr_id,
+            body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
+          });
+        } catch (ex) {
+          const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
+          await octokit.issues.createComment({
+            owner: repositoryOwner,
+            repo: repositoryName,
+            issue_number: parameters.pr_id,
+            body: message,
+          });
+        }
       }
     }
   }
