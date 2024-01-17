@@ -39,6 +39,8 @@ async function codeReview(parameters) {
     pull_number: parameters.pr_id,
   });
 
+  console.log('commits', JSON.stringify(commits))
+
   for (const commit of commits.data) {
     const files = await octokit.pulls.listFiles({
       owner: repositoryOwner,
