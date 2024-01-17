@@ -6,34 +6,34 @@ async function codeReview(parameters) {
   const openai = new OpenAI({ apiKey: parameters.openai_api_key });
 
   const repo = await octokit.repos.get({
-    owner: process.env.GITHUB_REPOSITORY_OWNER,
-    repo: process.env.GITHUB_REPOSITORY_NAME,
+    owner: parameters.github_repository_owner,
+    repo: parameters.github_repository_name,
   });
 
   const pullRequest = await octokit.pulls.get({
-    owner: process.env.GITHUB_REPOSITORY_OWNER,
-    repo: process.env.GITHUB_REPOSITORY_NAME,
+    owner: parameters.github_repository_owner,
+    repo: parameters.github_repository_name,
     pull_number: parameters.pr_id,
   });
 
   const resume = makeResumeForPullRequest(pullRequest.data);
   await octokit.issues.createComment({
-    owner: process.env.GITHUB_REPOSITORY_OWNER,
-    repo: process.env.GITHUB_REPOSITORY_NAME,
+    owner: parameters.github_repository_owner,
+    repo: parameters.github_repository_name,
     issue_number: parameters.pr_id,
     body: resume,
   });
 
   const commits = await octokit.pulls.listCommits({
-    owner: process.env.GITHUB_REPOSITORY_OWNER,
-    repo: process.env.GITHUB_REPOSITORY_NAME,
+    owner: parameters.github_repository_owner,
+    repo: parameters.github_repository_name,
     pull_number: parameters.pr_id,
   });
 
   for (const commit of commits.data) {
     const files = await octokit.pulls.listFiles({
-      owner: process.env.GITHUB_REPOSITORY_OWNER,
-      repo: process.env.GITHUB_REPOSITORY_NAME,
+      owner: parameters.github_repository_owner,
+      repo: parameters.github_repository_name,
       pull_number: parameters.pr_id,
       commit_sha: commit.sha,
     });
@@ -41,13 +41,11 @@ async function codeReview(parameters) {
     for (const file of files.data) {
       const filename = file.filename;
       const content = await octokit.repos.getContent({
-        owner: process.env.GITHUB_REPOSITORY_OWNER,
-        repo: process.env.GITHUB_REPOSITORY_NAME,
+        owner: parameters.github_repository_owner,
+        repo: parameters.github_repository_name,
         path: filename,
         ref: commit.sha,
       });
-
-      console.log("content", JSON.stringify(content));
 
       try {
         const response = await openai.chat.completions.create({
@@ -62,16 +60,16 @@ async function codeReview(parameters) {
         });
 
         await octokit.issues.createComment({
-          owner: process.env.GITHUB_REPOSITORY_OWNER,
-          repo: process.env.GITHUB_REPOSITORY_NAME,
+          owner: parameters.github_repository_owner,
+          repo: parameters.github_repository_name,
           issue_number: parameters.pr_id,
           body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
         });
       } catch (ex) {
         const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
         await octokit.issues.createComment({
-          owner: process.env.GITHUB_REPOSITORY_OWNER,
-          repo: process.env.GITHUB_REPOSITORY_NAME,
+          owner: parameters.github_repository_owner,
+          repo: parameters.github_repository_name,
           issue_number: parameters.pr_id,
           body: message,
         });
@@ -81,7 +79,7 @@ async function codeReview(parameters) {
 }
 
 function makePrompt(devLang) {
-  return `Review this ${devLang} code for potential bugs or Code Smells and suggest improvements. Generate your response in markdown format`;
+  return `Review this ${devLang} code for suggest unit test with each new function. Generate your response in markdown format`;
 }
 
 function makeResumeForPullRequest(pr) {
@@ -104,6 +102,8 @@ const args = require("minimist")(process.argv.slice(2));
     model: args["openai-engine"],
     github_token: args["github-token"],
     openai_api_key: args["openai-api-key"],
+    github_repository_name: args["github-repository-name"],
+    github_repository_owner: args["github-repository-owner"]
   };
 
   console.log(JSON.stringify(parameters))

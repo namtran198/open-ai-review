@@ -24,5 +24,7 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-pr-id: ${{ github.event.number }}
+          github-repository-name: ${{ github.repository }}
+          github-repository-owner: ${{ github.repository_owner }}
           dev-lang: Javascript
           openai-max-tokens: 4096
