@@ -55,6 +55,8 @@ async function codeReview(parameters) {
           ref: commit.sha,
         });
 
+        console.log(JSON.stringify(content))
+
         try {
           const response = await openai.chat.completions.create({
             model: parameters.model,
@@ -66,6 +68,8 @@ async function codeReview(parameters) {
             ],
             temperature: parameters.temperature,
           });
+
+          console.log(JSON.stringify(response))
 
           await octokit.issues.createComment({
             owner: repositoryOwner,
