@@ -39,7 +39,7 @@ async function codeReview(parameters) {
     pull_number: parameters.pr_id,
   });
 
-  console.log('commits', JSON.stringify(commits))
+  console.log("commits", JSON.stringify(commits));
 
   for (const commit of commits.data) {
     const files = await octokit.pulls.listFiles({
@@ -49,7 +49,12 @@ async function codeReview(parameters) {
       commit_sha: commit.sha,
     });
 
-    console.log('files', JSON.stringify(files))
+    console.log("files", JSON.stringify(files));
+
+    console.log(
+      "prompt",
+      `${parameters.prompt}:\n\`\`\`${content.data.content}\`\`\``
+    );
 
     for (const file of files.data) {
       const filename = file.filename;
@@ -61,10 +66,11 @@ async function codeReview(parameters) {
         const content = await octokit.repos.getContent({
           owner: repositoryOwner,
           repo: repositoryName,
-          path: filename
+          path: filename,
+          ref: commit.sha,
         });
 
-        console.log(JSON.stringify(content));
+        console.log("content", JSON.stringify(content));
 
         try {
           const response = await openai.chat.completions.create({
@@ -78,7 +84,7 @@ async function codeReview(parameters) {
             temperature: parameters.temperature,
           });
 
-          console.log(JSON.stringify(response));
+          console.log("response", JSON.stringify(response));
 
           await octokit.issues.createComment({
             owner: repositoryOwner,
