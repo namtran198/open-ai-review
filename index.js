@@ -51,10 +51,7 @@ async function codeReview(parameters) {
 
     console.log("files", JSON.stringify(files));
 
-    console.log(
-      "prompt",
-      `${parameters.prompt}:\n\`\`\`${content.data.content}\`\`\``
-    );
+    console.log("prompt", `${parameters.prompt}:\n\`\`\`\`\`\``);
 
     for (const file of files.data) {
       const filename = file.filename;
