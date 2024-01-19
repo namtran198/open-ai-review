@@ -77,7 +77,7 @@ async function codeReview(parameters) {
             messages: [
               {
                 role: "user",
-                content: `Given the following patch:\\n\\n${contentPatch}\\n\\nIf there are any new functions in this file that do not already have a unit test for them with ${devLang} language, then write a test case (unit-test) for these functions in Jest`
+                content: `Given the following patch:\\n\\n${contentPatch}\\n\\nIf there are any new functions in this file that do not already have a unit test for them with Javascript language, then write a test case (unit-test) for these functions in Jest`
               },
             ],
             temperature: parameters.temperature,
