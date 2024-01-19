@@ -60,14 +60,16 @@ async function codeReview(parameters) {
         filename.endsWith(".ts") ||
         filename.endsWith(".tsx")
       ) {
-        const content = await octokit.repos.getContent({
-          owner: repositoryOwner,
-          repo: repositoryName,
-          path: filename,
-          ref: commit.sha,
-        });
+        // const content = await octokit.repos.getContent({
+        //   owner: repositoryOwner,
+        //   repo: repositoryName,
+        //   path: filename,
+        //   ref: commit.sha,
+        // });
 
-        console.log("content", JSON.stringify(content));
+        const contentPatch = file.patch;
+
+        console.log("contentPatch", JSON.stringify(contentPatch));
 
         try {
           const response = await openai.chat.completions.create({
@@ -75,7 +77,7 @@ async function codeReview(parameters) {
             messages: [
               {
                 role: "user",
-                content: `${parameters.prompt}:\n\`\`\`${content.data.content}\`\`\``,
+                content: `Given the following patch:\\n\\n${contentPatch}\\n\\nif there are any new functions in this patch that do not already have a unit test for them, then create GitHub Review comments suggesting each unit test as a code change and fill each one into a JSON object like: { \"path\": \"\", \"body\": \"FILL IN SUGGESTION\\n\\\\u0060\\\\u0060\\\\u0060suggestion\\nUNIT_TEST_CODE\\\\u0060\\\\u0060\\\\u0060\", \"start_side\": \"RIGHT\", \"side\": \"RIGHT\", \"start_line\":  STARTING_LINE, \"line\": ENDING_LINE } and then return just those objects in an array.`
               },
             ],
             temperature: parameters.temperature,
