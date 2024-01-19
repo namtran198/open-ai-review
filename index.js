@@ -33,73 +33,54 @@ async function codeReview(parameters) {
     body: resume,
   });
 
-  const commits = await octokit.pulls.listCommits({
+  const files = await octokit.pulls.listFiles({
     owner: repositoryOwner,
     repo: repositoryName,
     pull_number: parameters.pr_id,
   });
 
-  console.log("commits", JSON.stringify(commits));
+  console.log("files", JSON.stringify(files));
 
-  for (const commit of commits.data) {
-    const files = await octokit.pulls.listFiles({
-      owner: repositoryOwner,
-      repo: repositoryName,
-      pull_number: parameters.pr_id,
-      commit_sha: commit.sha,
-    });
+  for (const file of files.data) {
+    const filename = file.filename;
+    if (
+      filename.endsWith(".js") ||
+      filename.endsWith(".ts") ||
+      filename.endsWith(".tsx")
+    ) {
 
-    console.log("files", JSON.stringify(files));
+      const contentPatch = file.patch;
 
-    console.log("prompt", `${parameters.prompt}:\n\`\`\`\`\`\``);
+      console.log("contentPatch", JSON.stringify(contentPatch));
 
-    for (const file of files.data) {
-      const filename = file.filename;
-      if (
-        filename.endsWith(".js") ||
-        filename.endsWith(".ts") ||
-        filename.endsWith(".tsx")
-      ) {
-        // const content = await octokit.repos.getContent({
-        //   owner: repositoryOwner,
-        //   repo: repositoryName,
-        //   path: filename,
-        //   ref: commit.sha,
-        // });
+      try {
+        const response = await openai.chat.completions.create({
+          model: parameters.model,
+          messages: [
+            {
+              role: "user",
+              content: `Given the following patch:\\n\\n${contentPatch}\\n\\nIf there are any new functions in this file that do not already have a unit test for them with Javascript language, then write a test case (unit-test) for these functions in Jest`,
+            },
+          ],
+          temperature: parameters.temperature,
+        });
 
-        const contentPatch = file.patch;
+        console.log("response", JSON.stringify(response));
 
-        console.log("contentPatch", JSON.stringify(contentPatch));
-
-        try {
-          const response = await openai.chat.completions.create({
-            model: parameters.model,
-            messages: [
-              {
-                role: "user",
-                content: `Given the following patch:\\n\\n${contentPatch}\\n\\nIf there are any new functions in this file that do not already have a unit test for them with Javascript language, then write a test case (unit-test) for these functions in Jest`
-              },
-            ],
-            temperature: parameters.temperature,
-          });
-
-          console.log("response", JSON.stringify(response));
-
-          await octokit.issues.createComment({
-            owner: repositoryOwner,
-            repo: repositoryName,
-            issue_number: parameters.pr_id,
-            body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
-          });
-        } catch (ex) {
-          const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
-          await octokit.issues.createComment({
-            owner: repositoryOwner,
-            repo: repositoryName,
-            issue_number: parameters.pr_id,
-            body: message,
-          });
-        }
+        await octokit.issues.createComment({
+          owner: repositoryOwner,
+          repo: repositoryName,
+          issue_number: parameters.pr_id,
+          body: `ChatGPT's review about \`${filename}\` file:\n ${response.choices[0].message.content}`,
+        });
+      } catch (ex) {
+        const message = `🚨 Fail code review process for file **${filename}**.\n\n\`${ex.message}\``;
+        await octokit.issues.createComment({
+          owner: repositoryOwner,
+          repo: repositoryName,
+          issue_number: parameters.pr_id,
+          body: message,
+        });
       }
     }
   }
